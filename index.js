@@ -20,19 +20,42 @@ const app = express()
 // making sure our app uses cors
 app.use(cors())
 
-app.get('/', function(req, res) {
-    res.json("This is my webscrapper")
-})
+// app.get('/', function(req, res) {
+//     res.json("This is my webscrapper")
+// })
 
-app.get('/results', function(req, res) {
+app.get('/', function(req, res) {
     axios(mojeDelo)
         .then(response => {
             const html = response.data
             const $ = cheerio.load(html);
 
-            $(".w-inline-block.job-ad.deluxe.w-clearfix .details .title", html).each(function(){
-                const jobTitle = $(this).text()
-                jobListings.push(jobTitle)
+            // $(".w-inline-block.job-ad.deluxe.w-clearfix .details .title", html).each(function(){
+            //     const jobTitle = $(this).text()
+            //     jobListings.push(jobTitle)
+            // })
+            //
+            // $(".w-inline-block.job-ad.deluxe.w-clearfix .details p", html).each(function(){
+            //     const jobDescription = $(this).text()
+            //     jobListings.push(jobDescription)
+            // })
+
+            $(".w-inline-block.job-ad.deluxe.w-clearfix", html).each(function(){
+                const jobTitle = $(this).find('h2.title').text()
+                const baseUrl = 'https://www.mojedelo.com/'
+                const url = $(this).attr('href')
+                const jobLink = baseUrl + url
+                const companyName = $(this).find('.boxName .detail').text()
+                const jobLocation = $(this).find('.box-details-icon.icon-map-marker + .detail').text()
+                const datePosted = $(this).find('.box-details-icon.icon-calendar + .detail').text()
+
+                jobListings.push({
+                    jobTitle,
+                    jobLink,
+                    companyName,
+                    jobLocation,
+                    datePosted
+                })
             })
 
             res.json(jobListings)
